@@ -1,45 +1,35 @@
-import axios from "axios";
+import { AxiosError } from "axios";
 import { useState, useEffect } from "react";
 
 import BreweryItem from "./BreweryItem";
+import { Brewery, BreweryProps } from "../types/interfaces";
+import { getBreweries } from "../services/breweries";
 
-export interface Brewery {
-  id: string;
-  name: string;
-  brewery_type: string;
-  address_1: string;
-  address_2: string;
-  address_3: string;
-  city: string;
-  state_province: string;
-  postal_code: string;
-  country: string;
-  longitude: string;
-  latitude: string;
-  phone: string;
-  website_url: string;
-  state: string;
-  street: string;
-}
-
-const BreweryList = () => {
+const BreweryList = (props: BreweryProps) => {
   const [breweries, setBreweries] = useState<Brewery[]>([]);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchBreweries("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchBreweries = async (params: string) => {
-    const response = await axios.get(
-      `https://api.openbrewerydb.org/v1/breweries${params}`
-    );
-    setBreweries(response.data);
+    try {
+      props.setLoading(true);
+      const data = await getBreweries(params);
+      setBreweries(data);
+      props.setLoading(false);
+    } catch (e) {
+      const error = e as AxiosError;
+      props.setError(error.message);
+    }
   };
 
   const refetchBreweries = async (event: React.FormEvent<EventTarget>) => {
     event.preventDefault();
-    const searchParams = `?by_name=${search}`;
+    const encodedSearch = search.replace(" ", "_");
+    const searchParams = `?by_name=${encodedSearch}`;
     await fetchBreweries(searchParams);
     setSearch("");
   };
@@ -58,8 +48,9 @@ const BreweryList = () => {
           <button type="submit">Find</button>
         </form>
       </div>
-      {breweries &&
-        breweries.map((b) => <BreweryItem key={b.id} brewery={b} />)}
+      {breweries.map((b) => (
+        <BreweryItem key={b.id} brewery={b} />
+      ))}
     </div>
   );
 };

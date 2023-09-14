@@ -1,10 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { Brewery } from "./BreweryList";
-
-interface BreweryItemProps {
-  brewery: Brewery;
-}
+import { BreweryItemProps } from "../types/interfaces";
 
 const BreweryItem = (props: BreweryItemProps) => {
   const brewery = props.brewery;

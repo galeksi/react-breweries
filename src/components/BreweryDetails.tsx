@@ -1,18 +1,24 @@
-import axios from "axios";
+import { AxiosError } from "axios";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { getBrewery } from "../services/breweries";
 
-import { Brewery } from "./BreweryList";
+import { Brewery, BreweryProps } from "../types/interfaces";
 
-const BreweryDetails = () => {
+const BreweryDetails = (props: BreweryProps) => {
   const [brewery, setBrewery] = useState<Brewery>();
   const id = useParams().id;
 
   const fetchBrewery = async () => {
-    const response = await axios.get(
-      `https://api.openbrewerydb.org/v1/breweries/${id}`
-    );
-    setBrewery(response.data);
+    try {
+      props.setLoading(true);
+      const data = await getBrewery(id);
+      setBrewery(data);
+      props.setLoading(false);
+    } catch (e) {
+      const error = e as AxiosError;
+      props.setError(error.message);
+    }
   };
 
   useEffect(() => {
@@ -27,6 +33,11 @@ const BreweryDetails = () => {
         <div>
           <h3>{brewery.name}</h3>
           <h4>Type: {brewery.brewery_type}</h4>
+          <h4>
+            <Link to={`${brewery.website_url}`} target="_blank">
+              Go to homepage
+            </Link>
+          </h4>
           <div>
             <h4>Address</h4>
             <p>{brewery.address_1}</p>
@@ -36,9 +47,7 @@ const BreweryDetails = () => {
             <p>{brewery.country}</p>
           </div>
           <h4>
-            <Link to={`${brewery.website_url}`} target="_blank">
-              Go to homepage
-            </Link>
+            <Link to="/">Go back</Link>
           </h4>
         </div>
       )}
