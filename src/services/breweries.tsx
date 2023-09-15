@@ -5,7 +5,7 @@ const baseUrl = "https://api.openbrewerydb.org/v1/breweries";
 
 export const getBreweries = async (params: string) => {
   const response = await axios.get<any, AxiosResponse<Brewery[]>>(
-    `${baseUrl}/${params}`
+    `${baseUrl}${params}`
   );
   return response.data;
 };
