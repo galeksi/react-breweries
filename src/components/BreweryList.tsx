@@ -10,21 +10,17 @@ const BreweryList = (props: BreweryProps) => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(50);
+  const [type, setType] = useState("");
 
   useEffect(() => {
-    fetchBreweries("");
+    fetchBreweries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page, perPage, type]);
 
-  useEffect(() => {
-    paginateBreweries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, perPage]);
-
-  const fetchBreweries = async (params: string) => {
+  const fetchBreweries = async () => {
     try {
       props.setLoading(true);
-      const data = await getBreweries(params);
+      const data = await getBreweries(setParams());
       setBreweries(data);
       props.setLoading(false);
     } catch (e) {
@@ -35,13 +31,26 @@ const BreweryList = (props: BreweryProps) => {
 
   const searchBreweries = async (event: React.FormEvent<EventTarget>) => {
     event.preventDefault();
-    const encodedSearch = search.replace(" ", "_");
-    const searchParams = `?by_name=${encodedSearch}`;
-    await fetchBreweries(searchParams);
+    setPage(1);
+    await fetchBreweries();
   };
 
-  const paginateBreweries = async () => {
-    await fetchBreweries(`?page=${page}&per_page=${perPage}`);
+  const filterBreweries = async (params: string) => {
+    setType(params);
+    setPage(1);
+    await fetchBreweries();
+  };
+
+  const clearSearch = () => {
+    setSearch("");
+    setPage(1);
+  };
+
+  const setParams = () => {
+    let paramString = `?page=${page}&per_page=${perPage}`;
+    if (search) paramString += `&by_name=${search}`;
+    if (type) paramString += `&by_type=${type}`;
+    return paramString;
   };
 
   return (
@@ -53,10 +62,10 @@ const BreweryList = (props: BreweryProps) => {
             name="search"
             placeholder="search by name"
             value={search}
-            onChange={({ target }) => setSearch(target.value)}
+            onChange={({ target }) => setSearch(target.value.replace(" ", "_"))}
           />
           <button type="submit">Find</button>
-          <button onClick={() => setSearch("")}>Clear search</button>
+          <button onClick={clearSearch}>Clear search</button>
         </form>
       </div>
       <div>
@@ -80,6 +89,25 @@ const BreweryList = (props: BreweryProps) => {
             <option value={50}>50</option>
             <option value={100}>100</option>
             <option value={200}>200</option>
+          </select>
+        </label>
+        <label>
+          Filter by type:
+          <select
+            value={type}
+            onChange={(e) => filterBreweries(e.target.value)}
+          >
+            <option value={""}>select</option>
+            <option value={"micro"}>Micro</option>
+            <option value={"nano"}>Nano</option>
+            <option value={"regional"}>Regional</option>
+            <option value={"brewpub"}>Brewpub</option>
+            <option value={"large"}>Large</option>
+            <option value={"planning"}>Planning</option>
+            <option value={"bar"}>Bar</option>
+            <option value={"contract"}>Contract</option>
+            <option value={"proprietor"}>Proprietor</option>
+            <option value={"closed"}>Closed</option>
           </select>
         </label>
       </div>
