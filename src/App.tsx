@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import ContactForm from "./components/ContactForm";
 import Error from "./components/Error";
 import Loading from "./components/Loading";
+import { Container } from "@mui/material";
 
 const App = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -21,7 +22,13 @@ const App = () => {
   };
 
   return (
-    <div className="container">
+    <Container
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <Header></Header>
       <Error message={errorMessage}></Error>
       <Routes>
@@ -39,7 +46,7 @@ const App = () => {
       </Routes>
       {loading && <Loading />}
       <Footer></Footer>
-    </div>
+    </Container>
   );
 };
 
